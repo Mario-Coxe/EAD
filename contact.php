@@ -2,121 +2,95 @@
 
 include 'components/connect.php';
 
-if(isset($_COOKIE['user_id'])){
+if (isset($_COOKIE['user_id'])) {
    $user_id = $_COOKIE['user_id'];
-}else{
+} else {
    $user_id = '';
 }
 
-if(isset($_POST['submit'])){
+if (isset($_POST['submit'])) {
 
-   $name = $_POST['name']; 
+   $name = $_POST['name'];
    $name = filter_var($name, FILTER_SANITIZE_STRING);
-   $email = $_POST['email']; 
+   $email = $_POST['email'];
    $email = filter_var($email, FILTER_SANITIZE_STRING);
-   $number = $_POST['number']; 
+   $number = $_POST['number'];
    $number = filter_var($number, FILTER_SANITIZE_STRING);
-   $msg = $_POST['msg']; 
+   $msg = $_POST['msg'];
    $msg = filter_var($msg, FILTER_SANITIZE_STRING);
 
    $select_contact = $conn->prepare("SELECT * FROM `contact` WHERE name = ? AND email = ? AND number = ? AND message = ?");
    $select_contact->execute([$name, $email, $number, $msg]);
 
-   if($select_contact->rowCount() > 0){
-      $message[] = 'message sent already!';
-   }else{
+   if ($select_contact->rowCount() > 0) {
+      $message[] = 'mensagem já enviada!';
+   } else {
       $insert_message = $conn->prepare("INSERT INTO `contact`(name, email, number, message) VALUES(?,?,?,?)");
       $insert_message->execute([$name, $email, $number, $msg]);
-      $message[] = 'message sent successfully!';
+      $message[] = 'mensagem enviada com sucesso!';
    }
 
 }
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
    <meta charset="UTF-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>contact</title>
-
-   <!-- font awesome cdn link  -->
+   <title>contato</title>
+   <!-- link para o CDN do Font Awesome -->
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
-
-   <!-- custom css file link  -->
+   <!-- link para o arquivo CSS personalizado -->
    <link rel="stylesheet" href="css/style.css">
-
 </head>
+
 <body>
+   <?php include 'components/user_header.php'; ?>
+   <!-- seção de contato começa  -->
+   <section class="contact">
+      <div class="row">
+         <div class="image">
+            <img src="images/contact-img.svg" alt="">
+         </div>
 
-<?php include 'components/user_header.php'; ?>
-
-<!-- contact section starts  -->
-
-<section class="contact">
-
-   <div class="row">
-
-      <div class="image">
-         <img src="images/contact-img.svg" alt="">
+         <form action="" method="post">
+            <h3>entre em contato</h3>
+            <input type="text" placeholder="Digite seu nome" required maxlength="100" name="name" class="box">
+            <input type="email" placeholder="Digite seu e-mail" required maxlength="100" name="email" class="box">
+            <input type="number" min="0" max="9999999999" placeholder="Digite seu número" required maxlength="10"
+               name="number" class="box">
+            <textarea name="msg" class="box" placeholder="Digite sua mensagem" required cols="30" rows="10"
+               maxlength="1000"></textarea>
+            <input type="submit" value="enviar mensagem" class="inline-btn" name="submit">
+         </form>
       </div>
+      <div class="box-container">
+         <div class="box">
+            <i class="fas fa-phone"></i>
+            <h3>número de telefone</h3>
+            <a href="tel:922723380">922723380</a>
+         </div>
 
-      <form action="" method="post">
-         <h3>get in touch</h3>
-         <input type="text" placeholder="enter your name" required maxlength="100" name="name" class="box">
-         <input type="email" placeholder="enter your email" required maxlength="100" name="email" class="box">
-         <input type="number" min="0" max="9999999999" placeholder="enter your number" required maxlength="10" name="number" class="box">
-         <textarea name="msg" class="box" placeholder="enter your message" required cols="30" rows="10" maxlength="1000"></textarea>
-         <input type="submit" value="send message" class="inline-btn" name="submit">
-      </form>
+         <div class="box">
+            <i class="fas fa-envelope"></i>
+            <h3>endereço de e-mail</h3>
+            <a href="mailto:aluapjustino1@gmail.com">aluapjustino1@gmail.com</a>
+         </div>
 
-   </div>
-
-   <div class="box-container">
-
-      <div class="box">
-         <i class="fas fa-phone"></i>
-         <h3>phone number</h3>
-         <a href="tel:1234567890">123-456-7890</a>
-         <a href="tel:1112223333">111-222-3333</a>
+         <div class="box">
+            <i class="fas fa-map-marker-alt"></i>
+            <h3>endereço do escritório</h3>
+            <a href="#">Sapú 2, Casas Verdes, Rua Da Pera, Casa Nº 45</a>
+         </div>
       </div>
-
-      <div class="box">
-         <i class="fas fa-envelope"></i>
-         <h3>email address</h3>
-         <a href="mailto:shaikhanas@gmail.com">shaikhanas@gmail.come</a>
-         <a href="mailto:anasbhai@gmail.com">anasbhai@gmail.come</a>
-      </div>
-
-      <div class="box">
-         <i class="fas fa-map-marker-alt"></i>
-         <h3>office address</h3>
-         <a href="#">flat no. 1, a-1 building, jogeshwari, mumbai, india - 400104</a>
-      </div>
-
-
-   </div>
-
-</section>
-
-<!-- contact section ends -->
-
-
-
-
-
-
-
-
-
-
-
-<?php include 'components/footer.php'; ?>  
-
-<!-- custom js file link  -->
-<script src="js/script.js"></script>
-   
+   </section>
+   <!-- seção de contato termina -->
+   <?php include 'components/footer.php'; ?>
+   <!-- link para o arquivo JS personalizado -->
+   <script src="js/script.js"></script>
 </body>
+
 </html>

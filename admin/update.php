@@ -1,15 +1,15 @@
 <?php
 
-   include '../components/connect.php';
+include '../components/connect.php';
 
-   if(isset($_COOKIE['tutor_id'])){
-      $tutor_id = $_COOKIE['tutor_id'];
-   }else{
-      $tutor_id = '';
-      header('location:login.php');
-   }
+if (isset($_COOKIE['tutor_id'])) {
+   $tutor_id = $_COOKIE['tutor_id'];
+} else {
+   $tutor_id = '';
+   header('location:login.php');
+}
 
-if(isset($_POST['submit'])){
+if (isset($_POST['submit'])) {
 
    $select_tutor = $conn->prepare("SELECT * FROM `tutors` WHERE id = ? LIMIT 1");
    $select_tutor->execute([$tutor_id]);
@@ -25,49 +25,49 @@ if(isset($_POST['submit'])){
    $email = $_POST['email'];
    $email = filter_var($email, FILTER_SANITIZE_STRING);
 
-   if(!empty($name)){
+   if (!empty($name)) {
       $update_name = $conn->prepare("UPDATE `tutors` SET name = ? WHERE id = ?");
       $update_name->execute([$name, $tutor_id]);
-      $message[] = 'username updated successfully!';
+      $message[] = 'nome atualizado com sucesso!';
    }
 
-   if(!empty($profession)){
+   if (!empty($profession)) {
       $update_profession = $conn->prepare("UPDATE `tutors` SET profession = ? WHERE id = ?");
       $update_profession->execute([$profession, $tutor_id]);
-      $message[] = 'profession updated successfully!';
+      $message[] = 'profissão atualizada com sucesso!';
    }
 
-   if(!empty($email)){
+   if (!empty($email)) {
       $select_email = $conn->prepare("SELECT email FROM `tutors` WHERE id = ? AND email = ?");
       $select_email->execute([$tutor_id, $email]);
-      if($select_email->rowCount() > 0){
-         $message[] = 'email already taken!';
-      }else{
+      if ($select_email->rowCount() > 0) {
+         $message[] = 'email já está sendo usado!';
+      } else {
          $update_email = $conn->prepare("UPDATE `tutors` SET email = ? WHERE id = ?");
          $update_email->execute([$email, $tutor_id]);
-         $message[] = 'email updated successfully!';
+         $message[] = 'email atualizado com sucesso!';
       }
    }
 
    $image = $_FILES['image']['name'];
    $image = filter_var($image, FILTER_SANITIZE_STRING);
    $ext = pathinfo($image, PATHINFO_EXTENSION);
-   $rename = unique_id().'.'.$ext;
+   $rename = unique_id() . '.' . $ext;
    $image_size = $_FILES['image']['size'];
    $image_tmp_name = $_FILES['image']['tmp_name'];
-   $image_folder = '../uploaded_files/'.$rename;
+   $image_folder = '../uploaded_files/' . $rename;
 
-   if(!empty($image)){
-      if($image_size > 2000000){
-         $message[] = 'image size too large!';
-      }else{
+   if (!empty($image)) {
+      if ($image_size > 2000000) {
+         $message[] = 'tamanho da imagem é muito grande!';
+      } else {
          $update_image = $conn->prepare("UPDATE `tutors` SET `image` = ? WHERE id = ?");
          $update_image->execute([$rename, $tutor_id]);
          move_uploaded_file($image_tmp_name, $image_folder);
-         if($prev_image != '' AND $prev_image != $rename){
-            unlink('../uploaded_files/'.$prev_image);
+         if ($prev_image != '' and $prev_image != $rename) {
+            unlink('../uploaded_files/' . $prev_image);
          }
-         $message[] = 'image updated successfully!';
+         $message[] = 'imagem atualizada com sucesso!';
       }
    }
 
@@ -79,18 +79,18 @@ if(isset($_POST['submit'])){
    $cpass = sha1($_POST['cpass']);
    $cpass = filter_var($cpass, FILTER_SANITIZE_STRING);
 
-   if($old_pass != $empty_pass){
-      if($old_pass != $prev_pass){
-         $message[] = 'old password not matched!';
-      }elseif($new_pass != $cpass){
-         $message[] = 'confirm password not matched!';
-      }else{
-         if($new_pass != $empty_pass){
+   if ($old_pass != $empty_pass) {
+      if ($old_pass != $prev_pass) {
+         $message[] = 'senha antiga não corresponde!';
+      } elseif ($new_pass != $cpass) {
+         $message[] = 'confirmação de senha não corresponde!';
+      } else {
+         if ($new_pass != $empty_pass) {
             $update_pass = $conn->prepare("UPDATE `tutors` SET password = ? WHERE id = ?");
             $update_pass->execute([$cpass, $tutor_id]);
-            $message[] = 'password updated successfully!';
-         }else{
-            $message[] = 'please enter a new password!';
+            $message[] = 'senha atualizada com sucesso!';
+         } else {
+            $message[] = 'por favor, insira uma nova senha!';
          }
       }
    }
@@ -98,84 +98,68 @@ if(isset($_POST['submit'])){
 }
 
 ?>
-
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
    <meta charset="UTF-8">
    <meta http-equiv="X-UA-Compatible" content="IE=edge">
    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-   <title>Update Profile</title>
-
-   <!-- font awesome cdn link  -->
+   <title>Atualizar Perfil</title>
+   <!-- link para o CDN do font awesome -->
    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
-
-   <!-- custom css file link  -->
+   <!-- link para o arquivo CSS personalizado -->
    <link rel="stylesheet" href="../css/admin_style.css">
-
 </head>
+
 <body>
-
-<?php include '../components/admin_header.php'; ?>
-
-<!-- register section starts  -->
-
-<section class="form-container" style="min-height: calc(100vh - 19rem);">
-
-   <form class="register" action="" method="post" enctype="multipart/form-data">
-      <h3>update profile</h3>
-      <div class="flex">
-         <div class="col">
-            <p>your name </p>
-            <input type="text" name="name" placeholder="<?= $fetch_profile['name']; ?>" maxlength="50"  class="box">
-            <p>your profession </p>
-            <select name="profession" class="box">
-               <option value="" selected><?= $fetch_profile['profession']; ?></option>
-               <option value="developer">developer</option>
-               <option value="desginer">desginer</option>
-               <option value="musician">musician</option>
-               <option value="biologist">biologist</option>
-               <option value="teacher">teacher</option>
-               <option value="engineer">engineer</option>
-               <option value="lawyer">lawyer</option>
-               <option value="accountant">accountant</option>
-               <option value="doctor">doctor</option>
-               <option value="journalist">journalist</option>
-               <option value="photographer">photographer</option>
-            </select>
-            <p>your email </p>
-            <input type="email" name="email" placeholder="<?= $fetch_profile['email']; ?>" maxlength="20"  class="box">
+   <?php include '../components/admin_header.php'; ?>
+   <!-- seção de registro começa aqui -->
+   <section class="form-container" style="min-height: calc(100vh - 19rem);">
+      <form class="register" action="" method="post" enctype="multipart/form-data">
+         <h3>atualizar perfil</h3>
+         <div class="flex">
+            <div class="col">
+               <p>seu nome</p>
+               <input type="text" name="name" placeholder="<?= $fetch_profile['name']; ?>" maxlength="50" class="box">
+               <p>sua profissão</p>
+               <select name="profession" class="box">
+                  <option value="" selected>
+                     <?= $fetch_profile['profession']; ?>
+                  </option>
+                  <option value="developer">desenvolvedor</option>
+                  <option value="desginer">designer</option>
+                  <option value="musician">músico</option>
+                  <option value="biologist">biólogo</option>
+                  <option value="teacher">professor</option>
+                  <option value="engineer">engenheiro</option>
+                  <option value="lawyer">advogado</option>
+                  <option value="accountant">contador</option>
+                  <option value="doctor">médico</option>
+                  <option value="journalist">jornalista</option>
+                  <option value="photographer">fotógrafo</option>
+               </select>
+               <p>seu email</p>
+               <input type="email" name="email" placeholder="<?= $fetch_profile['email']; ?>" maxlength="20"
+                  class="box">
+            </div>
+            <div class="col">
+               <p>senha antiga:</p>
+               <input type="password" name="old_pass" placeholder="digite sua senha antiga" maxlength="20" class="box">
+               <p>nova senha:</p>
+               <input type="password" name="new_pass" placeholder="digite sua nova senha" maxlength="20" class="box">
+               <p>confirmar senha:</p>
+               <input type="password" name="cpass" placeholder="confirme sua nova senha" maxlength="20" class="box">
+            </div>
          </div>
-         <div class="col">
-            <p>old password :</p>
-            <input type="password" name="old_pass" placeholder="enter your old password" maxlength="20"  class="box">
-            <p>new password :</p>
-            <input type="password" name="new_pass" placeholder="enter your new password" maxlength="20"  class="box">
-            <p>confirm password :</p>
-            <input type="password" name="cpass" placeholder="confirm your new password" maxlength="20"  class="box">
-         </div>
-      </div>
-      <p>update pic :</p>
-      <input type="file" name="image" accept="image/*"  class="box">
-      <input type="submit" name="submit" value="update now" class="btn">
-   </form>
-
-</section>
-
-<!-- registe section ends -->
-
-
-
-
-
-
-
-
-
-
-<?php include '../components/footer.php'; ?>
-
-<script src="../js/admin_script.js"></script>
-   
+         <p>atualizar foto:</p>
+         <input type="file" name="image" accept="image/*" class="box">
+         <input type="submit" name="submit" value="atualizar agora" class="btn">
+      </form>
+   </section>
+   <!-- seção de registro termina aqui -->
+   <?php include '../components/footer.php'; ?>
+   <script src="../js/admin_script.js"></script>
 </body>
+
 </html>

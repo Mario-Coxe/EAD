@@ -6,7 +6,7 @@ if(isset($_COOKIE['user_id'])){
    $user_id = $_COOKIE['user_id'];
 }else{
    $user_id = '';
-   header('location:home.php');
+   header('location:index.php');
 }
 
 if(isset($_POST['delete_comment'])){

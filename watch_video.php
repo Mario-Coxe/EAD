@@ -293,14 +293,6 @@ if(isset($_POST['update_now'])){
 </section>
 
 <!-- comments section ends -->
-
-
-
-
-
-
-
-
 <?php include 'components/footer.php'; ?>
 
 <!-- custom js file link  -->
